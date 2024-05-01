@@ -122,3 +122,5 @@ endCopy:
 ; nasm texto.asm -f elf64 (esto te lo ensambla)
 ; gcc texto.o -no-pie (esto te compila el archivo ejecutable)
 ; ./a.out (este es el archivo ejecutable, si no le pones nombre es "a" por defecto)
+
+
