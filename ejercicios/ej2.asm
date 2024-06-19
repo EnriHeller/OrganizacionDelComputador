@@ -56,13 +56,13 @@ section .data
     ;Formatos
     nombreApellidoFormat db    "%s %s",0
     padronFormat         db    "%li",0
-    nacimientoFormat     db    "%i/%i/%i",0
+    nacimientoFormat     db    "%li %li %li",0
     msgFinalFormat       db    "El alumno %s %s de Padrón N° %li tiene %li años",0
 
     ;Mensajes
     msjNombreApellido    db    "Ingrese nombre y apellido del alumno: ",0
     msjPadron            db    "Ingrese su padrón: (NNNNN)",0
-    msjNacimiento        db    "Ingrese fecha de nacimiento: (DD/MM/AAAA) ",0
+    msjNacimiento        db    "Ingrese fecha de nacimiento: (DD MM AAAA) ",0
     msjDatosInvalidos    db    "Se detectaron datos invalidos, intente nuevamente.",0
 
     msjPrueba            db    "Todo bien.",0
@@ -75,12 +75,13 @@ section .bss
     padron              resb  20
     nacimiento          resb  20
 
-    edad                resw  1
+    edad                resd  1
     nombre              resb  50
     apellido            resb  50
     diaNacimiento       resd  1
     mesNacimiento       resd  1
     añoNacimiento       resd  1
+
 
 section .text
 
@@ -120,12 +121,12 @@ main:
 
     mLimpiarRegistros
 
-    ;parseo nacimiento
+    ;Parseo nacimiento
     mov rdi, nacimiento
     mov rsi, nacimientoFormat
-    mov rdx, diaNacimiento
-    mov rcx, mesNacimiento
-    mov r8, añoNacimiento
+    lea rdx, [diaNacimiento]
+    lea rcx, [mesNacimiento]
+    lea r8, [añoNacimiento]
     mScanf
 
     cmp rax, 3
@@ -136,8 +137,8 @@ main:
     mCalcularEdad
 
     mov rdi, msgFinalFormat
-    mov rsi, [nombre]
-    mov rdx, [apellido]
+    mov rsi, nombre
+    mov rdx, apellido
     mov rcx, [padron]
     mov r8, [edad]
     mPrintf
@@ -157,8 +158,7 @@ limpiarRegistros:
     ret
 
 calcularEdad:
-    mov rdi, [añoActual]
-    mov rsi, [añoNacimiento]
-    sub rdi, rsi
-    mov [edad], rsi
+    mov eax, [añoActual]
+    sub eax, [añoNacimiento]
+    mov dword[edad], eax
     ret
