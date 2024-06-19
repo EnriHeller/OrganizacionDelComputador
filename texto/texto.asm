@@ -120,11 +120,9 @@ endCopy:
 
 ;La idea para revertir la cadena es tener dos punteros: Uno al final del string ingresado por teclado y otro puntero al inicio del espacio guardado para el string invertido. A medida que voy copiando, voy decrementando la direccion del puntero que esta al final de la cadena original y aumentando la dirección del puntero del string nuevo invertido. 
 
-
 ;nextCharFindLast: para revertir la cadena, tengo que pararme al principio, recorrer byte a byte hasta encontrar el 0 que añadió el get por defecto. Ahi se que me paré al final. con cmp comparas el caracter que este en [text + desplazamiento ] y el otro será el 0. al lado del mas le pones el desplazamiento, alojado en el registro indice rsi. Despues usas la instrucción mov para traer ese registro. Le pones byte al principio, para acceder al primer byte al principio y despues ir moviendolo con el rsi que lo vas cambiando.  
 
 ;endString: A partir de aca no entendi un pingo. 
-
 
 ;Para compilar:
 ; nasm texto.asm -f elf64 (esto te lo ensambla)

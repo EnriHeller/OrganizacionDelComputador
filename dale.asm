@@ -1,43 +1,50 @@
+bits 64
 global main
 extern puts
 
 section .data
-    tabla db     "FKD", "EJG"
-    t1    db       "HIQ", "LMN"
-    t2    db        "OCR", "ABP"
-    desplaz db 0
-    val1 times 3    db 0
-
+    ddd db "*"
+    val db 0,0,0,0
 
 section .text
 
 main:
-    mov rbx,3
-    mov rcx,2
+    mov rbx,3 ; cargo 3 al registro base
+    mov rcx,3 ; cargo 3 al registro C
 
-    dec     rbx
-    imul    rbx,6
+    dec     rbx ;resto 1 al registro base
+    imul    rbx,6 ;multiplico por 6 al registro base -> rbx = 2*6 = 12 
 
-    sub     rcx,1
-    imul    rcx,2
+    sub     rcx,1 ;resto 1 al registro base
+    imul    rcx,2 ; multiplico por 2 -> rcx 2*2 = 4
 
-    add     rbx,rcx
-    lea     rax,[tabla]
-    add     rax,rbx
+    add     rbx,rcx ;calculo el desplazamiento sobre rbx
+    lea     rax,[tabla] ;copio dirección de tabla al rax
+    add     rax,rbx ; me muevo en la dirección hasta el final
 
-    sub rcx,2
+    sub rcx,2 ; Tenia 4 en el rcx, me queda 2
 
-    mov     rsi,rax
-    mov rdi, val1
+    mov rsi,rax ;muevo al rci Direccion de BP
+    mov rdi, val1 ; muevo al rdi donde arranca el val1
     
-    rep   movsb
+    rep movsb ;Copio el contenido dentro de la dirección del rsi (BP) a donde apunta el RDI.ahora val1 arranca con BP
 
-    mov rdi,val1
+    mov rdi,val1 ; muevo al RDI dirección de val1 
     sub rsp,8
     call puts
     add rsp,8
 
-    sub rax,rax
-    mov ax,[tabla + 3]
+    ;imprime BP
 
+    sub rax,rax ; vacio acumulador
+    mov ax,[tabla + 3] ;muevo a ax la dirección de tabla + 3
+    
     ret
+
+
+;Para compilar:
+
+; nasm dale.asm -f elf64 
+; gcc dale.o -no-pie 
+; ./a.out 
+
