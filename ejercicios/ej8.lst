@@ -1,0 +1,70 @@
+     1                                  ;Dada una matriz de 4x4 de números almacenados en BPF c/s de 16 bits, calcule la
+     2                                  ;diagonal inversa e imprimirla por pantalla.
+     3                                  
+     4                                  global main
+     5                                  
+     6                                  extern puts
+     7                                  extern gets
+     8                                  extern printf
+     9                                  
+    10                                  %macro mPuts 1
+    11                                      mov rdi, %1
+    12                                      sub rsp, 8
+    13                                      call puts
+    14                                      add rsp, 8
+    15                                  %endmacro
+    16                                  
+    17                                  %macro mGets 1
+    18                                      mov rdi, %1
+    19                                      sub rsp, 8
+    20                                      call gets
+    21                                      add rsp, 8
+    22                                  %endmacro
+    23                                  
+    24                                  %macro mPrintf 0
+    25                                      sub rsp, 8
+    26                                      call printf
+    27                                      add rsp, 8
+    28                                  %endmacro
+    29                                  
+    30                                  section .data
+    31                                  
+    32 00000000 0100020003000400        tabla   dw 1,2,3,4
+    33 00000008 0500060007000800                dw 5,6,7,8
+    34 00000010 09000A000B000C00                dw 9,10,11,12
+    35 00000018 0D000E000F001000                dw 13,14,15,16
+    36                                  
+    37                                  
+    38 00000020 4C6120646961676F6E-     formatResultado db "La diagonal inversa es: %li",10,0
+    38 00000029 616C20696E76657273-
+    38 00000032 612065733A20256C69-
+    38 0000003B 0A00               
+    39                                  
+    40 0000003D 08                      longFila      db 8 ;longFila = longElemento (2) * cantidad de Columnas (4)
+    41 0000003E 02                      longElemento  db 2
+    42 0000003F 0000                    resultado     dw 0
+    43                                  
+    44                                  section .text
+    45                                  main:
+    46 00000000 4829C0                      sub rax, rax
+    47 00000003 4829C9                      sub rcx, rcx
+    48 00000006 4829F6                      sub rsi, rsi
+    49                                      
+    50 00000009 BE06000000                  mov rsi, 6 ;Inicializo el rsi en 6
+    51 0000000E B904000000                  mov rcx, 4 ;Inicializo el rcx en 4, siendo esta la cantidad de filas a recorrer
+    52                                  
+    53                                      calcularDInversa:
+    54 00000013 668B86[00000000]            mov ax, [tabla + rsi]
+    55 0000001A 66010425[3F000000]          add [resultado], ax
+    56 00000022 4883C606                    add rsi, 6
+    57 00000026 E2EB                        loop calcularDInversa
+    58                                  
+    59 00000028 48BF-                       mov rdi, formatResultado
+    59 0000002A [2000000000000000] 
+    60 00000032 488B3425[3F000000]          mov rsi, [resultado]
+    61                                      mPrintf
+    25 0000003A 4883EC08            <1>  sub rsp, 8
+    26 0000003E E8(00000000)        <1>  call printf
+    27 00000043 4883C408            <1>  add rsp, 8
+    62                                  
+    63 00000047 C3                          ret
