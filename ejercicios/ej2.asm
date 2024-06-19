@@ -1,3 +1,5 @@
+global main
+
 ;Realizar un programa en assembler Intel x86 que imprima por pantalla la siguiente
 ;frase: “El alumno [Nombre] [Apellido] de Padrón N° [Padrón] tiene [Edad] años para
 ;esto se debe solicitar previamente el ingreso por teclado de:
@@ -5,32 +7,21 @@
 ;N° de Padrón
 ;Fecha de nacimiento 
 
-global main
-extern puts
-extern gets
-extern    printf
-extern    sscanf
-
-
 %macro mPuts 1
     mov rdi, %1
+
     sub rsp, 8
     call puts
     add rsp, 8
 %endmacro
 
-%macro mGets 0
+%macro mGets 1
+    mov rdi, %1
+
     sub rsp, 8
     call gets
     add rsp, 8
 %endmacro
-
-%macro mSscanf 0
-    sub rsp, 8
-    call sscanf
-    add rsp, 8
-%endmacro
-
 
 %macro mPrintf 0
     sub rsp, 8
@@ -38,58 +29,136 @@ extern    sscanf
     add rsp, 8
 %endmacro
 
-section .data
-    msjNombre db "Decime el nombre", 0
-    msjPadron db "Decime el padron", 0
-    msjNacimiento db "Decime tu fecha de nacimiento", 0 ;dd/mm/aaaa
-    msjFinal db "El alumno %s de Padrón N° %s tiene %li años", 0
-    formatNacimiento    db    "%li/%li/%li", 0
-    anoActual dw   2024
+%macro mScanf 0
+    sub rsp, 8
+    call sscanf
+    add rsp, 8
+%endmacro
 
+%macro mLimpiarRegistros 0
+    sub rsp,8
+    call limpiarRegistros
+    add rsp,8
+%endmacro
+
+%macro mCalcularEdad 0
+    sub rsp,8
+    call calcularEdad
+    add rsp,8
+%endmacro
+
+extern puts
+extern gets
+extern printf
+extern sscanf
+
+section .data
+    ;Formatos
+    nombreApellidoFormat db    "%s %s",0
+    padronFormat         db    "%li",0
+    nacimientoFormat     db    "%i/%i/%i",0
+    msgFinalFormat       db    "El alumno %s %s de Padrón N° %li tiene %li años",0
+
+    ;Mensajes
+    msjNombreApellido    db    "Ingrese nombre y apellido del alumno: ",0
+    msjPadron            db    "Ingrese su padrón: (NNNNN)",0
+    msjNacimiento        db    "Ingrese fecha de nacimiento: (DD/MM/AAAA) ",0
+    msjDatosInvalidos    db    "Se detectaron datos invalidos, intente nuevamente.",0
+
+    msjPrueba            db    "Todo bien.",0
+
+    ;Datos
+    añoActual            dq    2024
 
 section .bss
-    nombre  resb 100
-    padron  resb 100
-    nacimiento  resb 100
-    dia         resq 1
-    mes         resq 1
-    ano         resq 1
-    edad        resq 1
+    nombreApellido      resb  50
+    padron              resb  20
+    nacimiento          resb  20
+
+    edad                resw  1
+    nombre              resb  50
+    apellido            resb  50
+    diaNacimiento       resd  1
+    mesNacimiento       resd  1
+    añoNacimiento       resd  1
 
 section .text
 
 main:
+    inputDatos:
+    mPuts msjNombreApellido
+    mGets nombreApellido
 
-    mPuts msjNombre
-    mov rdi, nombre
-    mGets
-
-
-    mPuts  msjPadron
-    mov rdi, padron
-    mGets
+    mPuts msjPadron
+    mGets padron
 
     mPuts msjNacimiento
-    mov rdi, nacimiento
-    mGets
+    mGets nacimiento
 
-    mov     rdi, nacimiento
-    mov     rsi, formatNacimiento
-    mov     rdx, dia
-    mov     rcx, ano
-    mov     r8, mes
-    mSscanf
+    parseoDatos:
+    
+    ;Parseo nombre
+    mov rdi, nombreApellido
+    mov rsi, nombreApellidoFormat
+    mov rdx, nombre
+    mov rcx, apellido
+    mScanf
 
-    mov r9, [anoActual]
-    sub r9, [ano]
+    cmp rax, 2
+    jne datosInvalidos
 
-    mov [edad],r9
+    mLimpiarRegistros
 
-    mov rdi, msjFinal
-    mov rsi, nombre
+    ;Parseo padrón
+    mov rdi, padron
+    mov rsi, padronFormat
     mov rdx, padron
-    mov rcx, [edad]
+    mScanf
+
+    cmp rax, 1
+    jne datosInvalidos
+
+    mLimpiarRegistros
+
+    ;parseo nacimiento
+    mov rdi, nacimiento
+    mov rsi, nacimientoFormat
+    mov rdx, diaNacimiento
+    mov rcx, mesNacimiento
+    mov r8, añoNacimiento
+    mScanf
+
+    cmp rax, 3
+    jne datosInvalidos
+
+    mLimpiarRegistros
+
+    mCalcularEdad
+
+    mov rdi, msgFinalFormat
+    mov rsi, [nombre]
+    mov rdx, [apellido]
+    mov rcx, [padron]
+    mov r8, [edad]
     mPrintf
 
+    ret
 
+datosInvalidos:
+    mPuts msjDatosInvalidos
+    jmp inputDatos
+
+limpiarRegistros:
+    sub rdi, rdi
+    sub rsi, rsi
+    sub rdx, rdx
+    sub rcx, rcx
+    sub rax, rax
+    ret
+
+calcularEdad:
+    mov rdi, [añoActual]
+    mov rsi, [añoNacimiento]
+    sub rdi, rsi
+    mov [edad], rsi
     ret
