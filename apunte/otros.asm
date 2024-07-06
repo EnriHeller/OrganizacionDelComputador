@@ -9,5 +9,7 @@
 ; nasm -f elf64 -g -F dwarf -l archivo.lst -o archivo.o archivo.asm
 ; gcc -no-pie -o test archivo.o
 
-; nasm -f elf64 -g -F dwarf -l ej10.lst -o ej10.o ej10.asm
-; gcc -no-pie -o test ej10.o
+; nasm -f elf64 -g -F dwarf -l autos.lst -o autos.o autos.asm
+; nasm -f elf64 -g -F dwarf -l utils.lst -o utils.o utils.asm
+
+; gcc -no-pie -o test autos.o utils.o

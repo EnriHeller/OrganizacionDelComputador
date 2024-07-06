@@ -22,17 +22,16 @@ extern gets
     add rsp, 8
 %endmacro
 
-
 section .data
     msjInput    db "Ingrese un Decimal Empaquetado de 2 bytes.",0
-    letrasSigno db  "C","A","F","E","B","D",0
-    
-    RESULT  times 2 db 0
-    PACK    times 3 db 0
+    letrasSigno db  "C","A","F","E","B","D",0    
 
-;section .bss
-    ;RESULT  resb 1
-    ;PACK    resb 2
+section .bss
+    ;Reservo un espacio de mas porque habrá un byte para el 0 
+    ;y no quiero que se sobrescriba con lo de abajo:
+
+    RESULT  resb 2 
+    PACK    resb 3
 
 section .text
 main:

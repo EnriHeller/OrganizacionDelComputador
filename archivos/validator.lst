@@ -1,0 +1,27 @@
+     1                                  global validator
+     2                                  
+     3                                  section .text
+     4                                  validator:
+     5 00000000 4831DB                      xor rbx, rbx
+     6 00000003 4831C0                      xor rax, rax
+     7                                  compare:
+     8 00000006 B90A000000                  mov rcx, 10
+     9 0000000B 488D341E                    lea rsi,[rsi + rbx]
+    10 0000000F 488D3F                      lea rdi,[rdi]
+    11                                  
+    12 00000012 F3A6                        repe cmpsb
+    13 00000014 740F                        je equal
+    14                                  
+    15 00000016 4883FB28                    cmp rbx, 40
+    16 0000001A 740F                        je notEqual
+    17 0000001C 4883C30A                    add rbx, 10
+    18                                  
+    19 00000020 4831C9                      xor rcx, rcx
+    20 00000023 EBE1                        jmp compare
+    21                                  
+    22                                  equal:
+    23 00000025 B801000000                  mov rax, 1
+    24 0000002A C3                          ret
+    25                                  
+    26                                  notEqual:
+    27 0000002B C3                          ret

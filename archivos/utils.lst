@@ -1,0 +1,16 @@
+     1                                  global strLen
+     2                                  
+     3                                  ;Por calling convention:
+     4                                  ;rdi: dir inicio de string
+     5                                  ;El valor de retorno por calling convention va en el rax (endStrLen)
+     6                                  
+     7                                  section .text
+     8                                  strLen:
+     9 00000000 B800000000                  mov     rax,0
+    10                                  nextChar:
+    11 00000005 803C0700                    cmp     byte[rdi + rax],0
+    12 00000009 7405                        je      endStrLen
+    13 0000000B 48FFC0                      inc     rax
+    14 0000000E EBF5                        jmp     nextChar
+    15                                  endStrLen:
+    16 00000010 C3                          ret

@@ -1,0 +1,267 @@
+     1                                  ;Se cuenta con un archivo "listado.dat" en fomrato binario con información de autos. Cada registro tiene los campos:
+     2                                  ; - Marca: 20 caracteres ascii
+     3                                  ; - Modelo: 20 caracteres ascii
+     4                                  ; - Año fabricación: 2 bytes en bpf s/s
+     5                                  ;
+     6                                  ;Se pide realizar un programa que pida ingresar por teclado una marca de automovil e imprima por pantalla todos los autos de dicha marca que se encuentran en el archivo.
+     7                                  ;
+     8                                  ; Las marcas válidas de autos posible son Fiat, Ford, Chevrolet y Peugeot y se deberá validar que la marca ingresada sea alguna de ellas previo a al búsqueda en el archivo. 
+     9                                  
+    10                                  %macro mPuts 1
+    11                                      mov rdi, %1
+    12                                  
+    13                                      sub rsp, 8
+    14                                      call puts
+    15                                      add rsp, 8
+    16                                  %endmacro 
+    17                                  
+    18                                  %macro mGets 1
+    19                                      mov rdi, %1
+    20                                  
+    21                                      sub rsp, 8
+    22                                      call gets
+    23                                      add rsp, 8
+    24                                  %endmacro 
+    25                                  
+    26                                  %macro mStrLen 1
+    27                                      mov rdi, %1
+    28                                  
+    29                                      sub rsp, 8
+    30                                      call strLen
+    31                                      add rsp, 8
+    32                                  %endmacro
+    33                                  
+    34                                  %macro mValidator 0
+    35                                      lea rdi, [marca10Chars]
+    36                                      lea rsi,[marcas]
+    37                                  
+    38                                      sub rsp, 8
+    39                                      call validator
+    40                                      add rsp, 8
+    41                                  %endmacro
+    42                                  
+    43                                  %macro mFopen 0
+    44                                      mCleanRx
+    45                                      mov rdi, [fileAutos]
+    46                                      mov rsi, [modeListado]
+    47                                  
+    48                                      sub rsp, 8
+    49                                      call fopen
+    50                                      add rsp, 8
+    51                                  %endmacro
+    52                                  
+    53                                  %macro mCleanRx 0
+    54                                      sub rsp,8
+    55                                      call cleanRx
+    56                                      add rsp,8
+    57                                  %endmacro
+    58                                  
+    59                                  global main
+    60                                  extern puts
+    61                                  extern gets
+    62                                  extern strLen
+    63                                  extern validator
+    64                                  extern fopen
+    65                                  extern fread
+    66                                  extern printf
+    67                                  extern fclose
+    68                                  
+    69                                  
+    70                                  section .data
+    71 00000000 496E67726573652075-         msgInMarca                  db "Ingrese una marca de auto:",0
+    71 00000009 6E61206D6172636120-
+    71 00000012 6465206175746F3A00 
+    72 0000001B 466961742020202020-         marcas                      db "Fiat      Ford      Chevrolet Peugeot   ",0
+    72 00000024 20466F726420202020-
+    72 0000002D 202043686576726F6C-
+    72 00000036 65742050657567656F-
+    72 0000003F 7420202000         
+    73 00000044 20<rep Ah>                  marca10Chars    times 10    db " "
+    74                                  
+    75 0000004E 4D617263612056616C-         msgValido                   db "Marca Validada.",0
+    75 00000057 69646164612E00     
+    76 0000005E 4D6172636120696E76-         msgInvalido                 db "Marca invalida, intente nuevamente.",0
+    76 00000067 616C6964612C20696E-
+    76 00000070 74656E7465206E7565-
+    76 00000079 76616D656E74652E00 
+    77                                  
+    78 00000082 6C69737461646F2E64-         fileAutos		            db	"listado.dat",0
+    78 0000008B 617400             
+    79 0000008E 726200                      modeListado		            db	"rb",0	
+    80 00000091 4572726F7220656E20-         msgErrOpenLis       	    db	"Error en apertura de archivo Listado",0
+    80 0000009A 617065727475726120-
+    80 000000A3 646520617263686976-
+    80 000000AC 6F204C69737461646F-
+    80 000000B5 00                 
+    81 000000B6 2573202568690A00            msgDataAuto                 db  "%s %hi",10,0
+    82                                  
+    83 000000BE 20<rep 14h>                 marcaModelo     times 20    db  " "
+    84 000000D2 00                           endStr                     db  0
+    85                                  
+    86                                  
+    87                                  
+    88                                  section .bss
+    89 00000000 <res C8h>                   inputMarca resb 200
+    90                                  
+    91 000000C8 ????????????????            handleListado           resq 1
+    92                                      regListado      times 0 resb 1  ;Cabecera del registro (con times 0 para q no reserve espacio)
+    93 000000D0 <res Ah>                        marca                 resb 10 ;Campo donde se guardara la marca leida del archivo
+    94 000000DA <res Ah>                        modelo                resb 10 ;Campo donde se guardara el modelo leido del archivo
+    95 000000E4 ????                            anioFabric            resb 2  ;Campo donde se guardara el año de fabricacion leido del archivo
+    96                                  
+    97                                  section .text
+    98                                  main:
+    99                                      mPuts msgInMarca
+    11 00000000 48BF-               <1>  mov rdi, %1
+    11 00000002 [0000000000000000]  <1>
+    12                              <1> 
+    13 0000000A 4883EC08            <1>  sub rsp, 8
+    14 0000000E E8(00000000)        <1>  call puts
+    15 00000013 4883C408            <1>  add rsp, 8
+   100                                      mGets inputMarca
+    19 00000017 48BF-               <1>  mov rdi, %1
+    19 00000019 [0000000000000000]  <1>
+    20                              <1> 
+    21 00000021 4883EC08            <1>  sub rsp, 8
+    22 00000025 E8(00000000)        <1>  call gets
+    23 0000002A 4883C408            <1>  add rsp, 8
+   101                                      mStrLen inputMarca
+    27 0000002E 48BF-               <1>  mov rdi, %1
+    27 00000030 [0000000000000000]  <1>
+    28                              <1> 
+    29 00000038 4883EC08            <1>  sub rsp, 8
+    30 0000003C E8(00000000)        <1>  call strLen
+    31 00000041 4883C408            <1>  add rsp, 8
+   102                                  
+   103                                  formateo:
+   104                                      ;me guardo con un espacio de 10 reservado lo que ingrese
+   105 00000045 4889C1                      mov rcx, rax ;Cargo el strLen al rcx
+   106 00000048 488D3425[00000000]          lea rsi, [inputMarca] ;copio lo que tengo en inputMarca
+   107 00000050 488D3C25[44000000]          lea rdi, [marca10Chars];Al marca10Chars
+   108 00000058 F3A4                        rep movsb
+   109                                  
+   110                                      mCleanRx
+    54 0000005A 4883EC08            <1>  sub rsp,8
+    55 0000005E E85F010000          <1>  call cleanRx
+    56 00000063 4883C408            <1>  add rsp,8
+   111                                  
+   112                                  comparo:
+   113                                      mValidator
+    35 00000067 488D3C25[44000000]  <1>  lea rdi, [marca10Chars]
+    36 0000006F 488D3425[1B000000]  <1>  lea rsi,[marcas]
+    37                              <1> 
+    38 00000077 4883EC08            <1>  sub rsp, 8
+    39 0000007B E8(00000000)        <1>  call validator
+    40 00000080 4883C408            <1>  add rsp, 8
+   114 00000084 4883F801                    cmp rax, 1
+   115 00000088 0F851C010000                jne noIguales
+   116                                  
+   117                                  Iguales:
+   118                                      mPuts msgValido
+    11 0000008E 48BF-               <1>  mov rdi, %1
+    11 00000090 [4E00000000000000]  <1>
+    12                              <1> 
+    13 00000098 4883EC08            <1>  sub rsp, 8
+    14 0000009C E8(00000000)        <1>  call puts
+    15 000000A1 4883C408            <1>  add rsp, 8
+   119                                      mFopen
+    44                              <1>  mCleanRx
+    54 000000A5 4883EC08            <2>  sub rsp,8
+    55 000000A9 E814010000          <2>  call cleanRx
+    56 000000AE 4883C408            <2>  add rsp,8
+    45 000000B2 488B3C25[82000000]  <1>  mov rdi, [fileAutos]
+    46 000000BA 488B3425[8E000000]  <1>  mov rsi, [modeListado]
+    47                              <1> 
+    48 000000C2 4883EC08            <1>  sub rsp, 8
+    49 000000C6 E8(00000000)        <1>  call fopen
+    50 000000CB 4883C408            <1>  add rsp, 8
+   120 000000CF 4883F800                    cmp rax, 0
+   121 000000D3 0F8EB7000000                jle errorOpenLis ; si me da 0 o menos hay error al abrir.
+   122 000000D9 48890425[C8000000]          mov [handleListado], rax ; me traigo el ID del archivo
+   123                                  
+   124                                  ;Leo un registro del archivo
+   125                                  readNexRegister:
+   126 000000E1 48BF-                       mov     rdi,regListado          ;Param 1: campo de memoria para guardar el registro q se leerá del archivo
+   126 000000E3 [D000000000000000] 
+   127 000000EB BE16000000                  mov     rsi,22                  ;Param 2: Tamaño del registro en bytes (10 bytes para la marca, 10 para el modelo y 2 que no se)
+   128 000000F0 BA01000000                  mov     rdx,1                   ;Param 3: Cantidad de registros a leer (** usamos siempre 1 **)
+   129 000000F5 488B0C25[C8000000]      	mov		rcx,[handleListado]     ;Param 4: id o handle del archivo (obtenido en fopen)
+   130                                  
+   131 000000FD 4883EC08                    sub		rsp,8  
+   132 00000101 E8(00000000)            	call    fread
+   133 00000106 4883C408                	add		rsp,8
+   134                                  
+   135 0000010A 4883F800                    cmp     rax,0
+   136 0000010E 7469                        je      closeFile
+   137                                  
+   138                                      ;Comparo la marca ingresada por teclado con el campo marca del registro leido del archivo
+   139 00000110 48BE-                       mov     rsi,marca
+   139 00000112 [D000000000000000] 
+   140 0000011A 48BF-                       mov     rdi,marca10Chars
+   140 0000011C [4400000000000000] 
+   141 00000124 B90A000000                  mov     rcx,10
+   142 00000129 F3A6                        repe cmpsb
+   143                                  
+   144 0000012B 75B4                        jne     readNexRegister
+   145                                  
+   146                                      ;Copio la marca y modelo en un campo q finalice con 0 binario (para poder usarlo en printf)
+   147 0000012D 48BE-                       mov     rsi,marca
+   147 0000012F [D000000000000000] 
+   148 00000137 48BF-                       mov     rdi,marcaModelo
+   148 00000139 [BE00000000000000] 
+   149 00000141 B914000000                  mov     rcx,20 ;copio 20 bytes por lo tanto se copia marca y modelo
+   150 00000146 F3A4                        rep movsb
+   151                                  
+   152                                      ;Imprimo los datos del auto encontrado en el archivo
+   153 00000148 48BF-                       mov     rdi,msgDataAuto
+   153 0000014A [B600000000000000] 
+   154 00000152 48BE-                       mov     rsi,marcaModelo
+   154 00000154 [BE00000000000000] 
+   155 0000015C 4831D2                      xor     rdx,rdx
+   156 0000015F 668B1425[E4000000]          mov     dx,[anioFabric]
+   157 00000167 4883EC08                    sub     rsp,8
+   158 0000016B E8(00000000)                call    printf
+   159 00000170 4883C408                    add     rsp,8
+   160                                      
+   161 00000174 E968FFFFFF                  jmp     readNexRegister
+   162                                  
+   163                                  
+   164                                      ;Cierro el archivo
+   165                                  closeFile:
+   166 00000179 488B3C25[C8000000]          mov     rdi,[handleListado]
+   167 00000181 4883EC08                    sub     rsp,8
+   168 00000185 E8(00000000)                call    fclose
+   169 0000018A 4883C408                    add     rsp,8
+   170                                  
+   171 0000018E EB19                        jmp     endProg
+   172                                  
+   173                                  errorOpenLis:
+   174                                      mPuts   msgErrOpenLis
+    11 00000190 48BF-               <1>  mov rdi, %1
+    11 00000192 [9100000000000000]  <1>
+    12                              <1> 
+    13 0000019A 4883EC08            <1>  sub rsp, 8
+    14 0000019E E8(00000000)        <1>  call puts
+    15 000001A3 4883C408            <1>  add rsp, 8
+   175 000001A7 EB00                    	jmp		endProg
+   176                                  
+   177                                  endProg:
+   178 000001A9 C3                      ret
+   179                                  
+   180                                  noIguales:
+   181                                      mPuts msgInvalido
+    11 000001AA 48BF-               <1>  mov rdi, %1
+    11 000001AC [5E00000000000000]  <1>
+    12                              <1> 
+    13 000001B4 4883EC08            <1>  sub rsp, 8
+    14 000001B8 E8(00000000)        <1>  call puts
+    15 000001BD 4883C408            <1>  add rsp, 8
+   182 000001C1 C3                          ret
+   183                                  
+   184                                  cleanRx:
+   185 000001C2 4829C0                      sub rax, rax
+   186 000001C5 4829C9                      sub rcx, rcx
+   187 000001C8 4829F6                      sub rsi, rsi
+   188 000001CB 4829FF                      sub rdi, rdi
+   189 000001CE C3                          ret
+   190                                  
